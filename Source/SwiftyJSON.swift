@@ -202,12 +202,12 @@ public struct JSON {
      Private woker function which does the actual merging
      Typecheck is set to true for the first recursion level to prevent total override of the source JSON
  	*/
-	fileprivate mutating func merge(with other: JSON, typecheck: Bool, arrayOverwrite: Bool) throws {
+	fileprivate mutating func merge(with other: JSON, typecheck: Bool, arrayOverwrite: Bool = false) throws {
         if self.type == other.type {
             switch self.type {
             case .dictionary:
                 for (key, _) in other {
-                    try self[key].merge(with: other[key], typecheck: false)
+                    try self[key].merge(with: other[key], typecheck: false, arrayOverwrite: arrayOverwrite)
                 }
             case .array:
                 if (arrayOverwrite) {
