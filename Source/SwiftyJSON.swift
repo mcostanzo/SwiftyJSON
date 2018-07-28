@@ -178,8 +178,8 @@ public struct JSON {
 	
 	 - throws `ErrorWrongType` if the other JSONs differs in type on the top level.
 	 */
-    public mutating func merge(with other: JSON) throws {
-        try self.merge(with: other, typecheck: true)
+    public mutating func merge(with other: JSON, arrayOverwrite: Bool = false) throws {
+        try self.merge(with: other, typecheck: true, arrayOverwrite: arrayOverwrite)
     }
 
 	/**
@@ -192,9 +192,9 @@ public struct JSON {
 	
 	 - returns: New merged JSON
 	 */
-    public func merged(with other: JSON) throws -> JSON {
+    public func merged(with other: JSON, arrayOverwrite: Bool = false) throws -> JSON {
         var merged = self
-        try merged.merge(with: other, typecheck: true)
+        try merged.merge(with: other, typecheck: true, arrayOverwrite: arrayOverwrite)
         return merged
     }
 
@@ -202,7 +202,7 @@ public struct JSON {
      Private woker function which does the actual merging
      Typecheck is set to true for the first recursion level to prevent total override of the source JSON
  	*/
- 	fileprivate mutating func merge(with other: JSON, typecheck: Bool) throws {
+	fileprivate mutating func merge(with other: JSON, typecheck: Bool, arrayOverwrite: Bool) throws {
         if self.type == other.type {
             switch self.type {
             case .dictionary:
@@ -210,7 +210,11 @@ public struct JSON {
                     try self[key].merge(with: other[key], typecheck: false)
                 }
             case .array:
-                self = JSON(self.arrayValue + other.arrayValue)
+                if (arrayOverwrite) {
+                    self = other
+                } else {
+                    self = JSON(self.arrayValue + other.arrayValue)
+                }
             default:
                 self = other
             }
